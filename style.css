@@ -1,251 +1,769 @@
-/* --- Proměnné a základ --- */
 :root {
     --primary-bg: #111;
-    --card-bg: #222;
+    --panel-bg: #222;
     --text-color: #f8f8f8;
     --highlight-color: #de0030;
-    --danger-color: #ff3b30;
-    --success-color: #ffffff;
-    --confirm-color: #4cd964;
-    --undo-color: #ffcc00;
+    --accent-yellow: #ffcc00;
+    --border-color: #444;
+
+    /* Gradienty Hráč A (Modrá) */
+    --pA-lvl4: #004ba0;
+    /* Nejtmavší */
+    --pA-lvl3: #007bb5;
+    --pA-lvl2: #00a0d1;
+    --pA-lvl1: #4fc3f7;
+    /* Nejsvětlejší */
+
+    /* Gradienty Hráč B (Červená) */
+    --pB-lvl4: #8b0000;
+    /* Nejtmavší */
+    --pB-lvl3: #b71c1c;
+    --pB-lvl2: #d32f2f;
+    --pB-lvl1: #e57373;
+    /* Nejsvětlejší */
 }
 
 body {
-    font-family: sans-serif;
     background-color: var(--primary-bg);
     color: var(--text-color);
+    font-family: 'Rajdhani', sans-serif;
     margin: 0;
-    padding: 5px;
-    display: flex;
-    flex-direction: row;
-    min-height: 100vh;
-    max-width: 100vw;
-    overflow: hidden;
-}
-
-.container {
-    flex-grow: 1;
+    height: 100vh;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    overflow: hidden;
+    user-select: none;
+}
+
+/* --- SETUP SCREEN --- */
+.setup-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
     width: 100%;
+    height: 100%;
+    background-color: var(--primary-bg);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
 }
 
-/* 1. SCOREBOARD */
-.score-preview {
-    background-color: var(--card-bg);
-    padding: 5px 15px;
-    border-radius: 8px;
+.setup-content {
     text-align: center;
-    flex-shrink: 0;
+    width: 90%;
+    max-width: 400px;
 }
 
-.score-main {
-    font-size: 3em;
-    font-weight: 800;
-    color: var(--success-color);
-    line-height: 1;
+.setup-content h1 {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 2.5rem;
+    color: #fff;
+    margin-bottom: 30px;
+    letter-spacing: 2px;
+    border-bottom: 3px solid var(--highlight-color);
+    display: inline-block;
+    padding-bottom: 10px;
 }
 
-.score-sets {
-    font-size: 0.9em;
-    color: #999;
+.setup-group {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
 }
 
-.player-label {
-    font-size: 1em;
-    font-weight: 600;
-    margin-bottom: 2px;
+.btn-setup {
+    background: var(--panel-bg);
+    border: 1px solid var(--border-color);
+    color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.2s;
+    display: flex;
+    flex-direction: column;
+}
+
+.btn-setup:hover {
+    border-color: var(--highlight-color);
+    background: #2a2a2a;
+    transform: translateX(5px);
+}
+
+.mode-title {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: var(--highlight-color);
+    margin-bottom: 5px;
+}
+
+.mode-desc {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.9rem;
+    color: #888;
+}
+
+.btn-setup.secondary .mode-title {
+    color: var(--accent-yellow);
+}
+
+.setup-footer {
+    margin-top: 30px;
+    color: #555;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.setup-footer p {
+    margin-bottom: 5px;
+}
+
+.version-tag {
+    background: #333;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: bold;
     color: var(--highlight-color);
 }
 
-.score-display-row {
+/* --- APLIKACE --- */
+.app-container {
     display: flex;
-    justify-content: space-around;
-    align-items: center;
+    flex-direction: column;
+    height: 100%;
+    padding: 10px;
+    box-sizing: border-box;
 }
 
-.set-control-wrapper {
+/* SCOREBOARD */
+.scoreboard-section {
     display: flex;
+    justify-content: space-between;
+    background-color: var(--panel-bg);
+    border-radius: 8px;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-bottom: 2px solid var(--highlight-color);
+}
+
+.player-score-box {
+    text-align: center;
+    width: 40%;
+    position: relative;
+}
+
+.player-name {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #888;
+    text-transform: uppercase;
+    border-bottom: 1px solid transparent;
+}
+
+.player-name:focus {
+    border-bottom: 1px solid #fff;
+    outline: none;
+    color: #fff;
+}
+
+.score-big {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 5rem;
+    font-weight: 800;
+    line-height: 1;
+    color: #fff;
+}
+
+.set-indicator {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 1rem;
+    color: #aaa;
+    background: #333;
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 4px;
+    transition: opacity 0.3s;
+}
+
+/* Třída pro skrytí setů v Bo1 */
+.invisible {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.warn-indicator {
+    background-color: var(--accent-yellow);
+    color: #000;
+    font-weight: bold;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.8rem;
+    padding: 2px 5px;
+    margin-top: 5px;
+    border-radius: 2px;
+    animation: flash 1s infinite;
+}
+
+@keyframes flash {
+    0% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.5;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
+
+.center-info {
+    display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
-    gap: 8px;
-    margin-top: 5px;
 }
 
-.set-btn {
-    width: 30px;
-    height: 30px;
-    line-height: 28px;
-    font-size: 1.2em;
-    font-weight: 700;
-    background-color: #333;
-    color: white;
-    border: 1px solid #555;
-    border-radius: 4px;
-    cursor: pointer;
-    padding: 0;
+.vs-text {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 900;
+    color: #444;
 }
 
-/* 2. OVLÁDÁNÍ */
-.controls-panel {
+.set-label {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.mode-label {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.7rem;
+    color: #555;
+    margin-top: 2px;
+    text-transform: uppercase;
+    font-weight: bold;
+}
+
+/* CONTROLS */
+.controls-section {
     flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-    min-height: 0;
-}
-
-.player-control-area {
-    background-color: var(--card-bg);
-    padding: 10px;
-    border-radius: 8px;
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-}
-
-/* GRID PRO HLAVNÍ OVLÁDÁNÍ */
-.control-grid-main {
     display: grid;
-    grid-template-columns: 1fr 0.6fr 1fr;
-    gap: 15px;
-    height: 100%;
-    align-items: stretch;
+    grid-template-columns: 1fr 0.4fr 1fr;
+    gap: 10px;
 }
 
-.score-buttons-stack {
+.player-controls {
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
     gap: 8px;
-    height: 100%;
 }
 
-.score-btn {
-    width: 100%;
+/* TLAČÍTKA FINISH */
+.btn-finish {
     flex-grow: 1;
-    font-size: 1.6em;
-    font-weight: 800;
-    border-radius: 6px;
+    background-color: #333;
     border: none;
-    background-color: var(--highlight-color);
-    color: white;
+    color: #fff;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 1rem;
+    font-weight: bold;
     cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    padding: 0 15px;
+    align-items: center;
+    transition: background 0.1s;
+    border-radius: 4px;
+    border-left: 6px solid transparent;
+    /* Barevný pruh vlevo */
 }
 
-/* Středový panel (Undo / Reset) */
+.btn-finish:active {
+    transform: scale(0.98);
+}
+
+.btn-finish .lbl {
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.btn-finish .pts {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 1.2rem;
+    opacity: 0.8;
+}
+
+/* Gradienty pro Hráče A (Levá strana) */
+.player-controls:not(.right-side) .lvl-4 {
+    border-left-color: var(--pA-lvl4);
+    background: linear-gradient(90deg, rgba(0, 75, 160, 0.2) 0%, transparent 100%);
+}
+
+.player-controls:not(.right-side) .lvl-3 {
+    border-left-color: var(--pA-lvl3);
+    background: linear-gradient(90deg, rgba(0, 123, 181, 0.2) 0%, transparent 100%);
+}
+
+.player-controls:not(.right-side) .lvl-2 {
+    border-left-color: var(--pA-lvl2);
+    background: linear-gradient(90deg, rgba(0, 160, 209, 0.2) 0%, transparent 100%);
+}
+
+.player-controls:not(.right-side) .lvl-1 {
+    border-left-color: var(--pA-lvl1);
+    background: linear-gradient(90deg, rgba(79, 195, 247, 0.2) 0%, transparent 100%);
+}
+
+/* Gradienty pro Hráče B (Pravá strana) */
+.right-side .btn-finish {
+    flex-direction: row-reverse;
+    border-left: none;
+    border-right: 6px solid transparent;
+    text-align: right;
+}
+
+.right-side .lvl-4 {
+    border-right-color: var(--pB-lvl4);
+    background: linear-gradient(-90deg, rgba(139, 0, 0, 0.3) 0%, transparent 100%);
+}
+
+.right-side .lvl-3 {
+    border-right-color: var(--pB-lvl3);
+    background: linear-gradient(-90deg, rgba(183, 28, 28, 0.3) 0%, transparent 100%);
+}
+
+.right-side .lvl-2 {
+    border-right-color: var(--pB-lvl2);
+    background: linear-gradient(-90deg, rgba(211, 47, 47, 0.3) 0%, transparent 100%);
+}
+
+.right-side .lvl-1 {
+    border-right-color: var(--pB-lvl1);
+    background: linear-gradient(-90deg, rgba(229, 115, 115, 0.3) 0%, transparent 100%);
+}
+
+
+/* VAROVÁNÍ */
+.btn-warn {
+    height: 45px;
+    background-color: #222;
+    color: var(--accent-yellow);
+    border: 2px solid var(--accent-yellow);
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 5px;
+    border-radius: 4px;
+}
+
+.btn-warn.active {
+    background-color: var(--accent-yellow);
+    color: #000;
+}
+
+/* STŘEDOVÉ NÁSTROJE */
 .center-controls {
     display: flex;
     flex-direction: column;
+    gap: 8px;
     justify-content: center;
-    gap: 15px;
+}
+
+.btn-utility {
+    padding: 12px;
+    background: #222;
+    border: 1px solid #444;
+    color: #aaa;
+    cursor: pointer;
+    font-weight: bold;
+    border-radius: 4px;
 }
 
 .btn-undo {
-    width: 100%;
-    height: 60px;
-    background-color: var(--undo-color);
-    color: #000;
-    font-size: 1em;
-    font-weight: 700;
-    border-radius: 6px;
-    border: none;
-    cursor: pointer;
+    color: var(--accent-yellow);
+    border-color: var(--accent-yellow);
 }
 
+.btn-redo {
+    color: var(--accent-blue);
+    border-color: var(--accent-blue);
+}
+
+/* Redo modré */
 .btn-reset {
+    color: var(--highlight-color);
+}
+
+.btn-menu {
+    border-color: #666;
+    color: #888;
+    margin-top: auto;
+}
+
+/* MODALS */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
     width: 100%;
-    height: 60px;
-    background-color: #444;
-    color: white;
-    font-size: 0.9em;
-    font-weight: 600;
-    border-radius: 6px;
-    border: none;
-    cursor: pointer;
-}
-
-/* 3. POTVRZOVACÍ GRID */
-.confirm-grid {
-    display: flex;
-    gap: 10px;
     height: 100%;
-    align-items: stretch;
-}
-
-.btn-action-confirm {
-    flex: 2;
-    background-color: var(--confirm-color);
-    color: #000;
-    font-size: 1.8em;
-    font-weight: 900;
-    border-radius: 8px;
-    border: none;
-    cursor: pointer;
-    animation: pulse 1.5s infinite;
-}
-
-.btn-action-undo {
-    flex: 1;
-    background-color: var(--undo-color);
-    color: #000;
-    font-size: 1.1em;
-    font-weight: 700;
-    border-radius: 8px;
-    border: none;
-    cursor: pointer;
-}
-
-.btn-action-reset {
-    flex: 1;
-    background-color: #222;
-    color: var(--danger-color);
-    font-size: 1em;
-    font-weight: 700;
-    border: 2px solid var(--danger-color);
-    border-radius: 8px;
-    cursor: pointer;
-}
-
-@keyframes pulse {
-    0% { box-shadow: 0 0 0 0 rgba(76, 217, 100, 0.4); }
-    70% { box-shadow: 0 0 0 10px rgba(76, 217, 100, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(76, 217, 100, 0); }
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(5px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 999;
 }
 
 .hidden {
     display: none !important;
 }
 
-.messages {
+.modal-content {
+    background: var(--panel-bg);
+    border: 1px solid #444;
+    padding: 20px;
+    width: 90%;
+    max-width: 400px;
     text-align: center;
-    margin-top: 5px;
-    font-size: 0.9em;
-    color: var(--highlight-color);
-    height: 1.2em;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
 }
 
-/* --- VYNUCENÍ LANDSCAPE REŽIMU (CSS HACK) --- */
-@media screen and (orientation: portrait) {
-    body {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100vh;
-        height: 100vw;
-        overflow: hidden;
-        transform: rotate(90deg);
-        transform-origin: bottom left;
-        position: absolute;
-        top: -100vw;
-        left: 0;
-        overflow: hidden;
-        background-color: var(--primary-bg);
+.winner-name-display {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: #fff;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.stat-item {
+    background: #111;
+    padding: 10px;
+    border: 1px solid #333;
+    display: flex;
+    justify-content: space-between;
+}
+
+.stat-item span {
+    color: #888;
+}
+
+.stat-item b {
+    color: #fff;
+}
+
+.btn-next-set {
+    width: 100%;
+    padding: 15px;
+    background: var(--highlight-color);
+    color: #fff;
+    border: none;
+    font-weight: bold;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 1.1rem;
+    cursor: pointer;
+    margin-bottom: 10px;
+}
+
+.btn-close,
+.btn-close-modal {
+    background: transparent;
+    border: 1px solid #555;
+    color: #888;
+    padding: 10px;
+    width: 100%;
+    cursor: pointer;
+}
+
+#historyList {
+    list-style: none;
+    padding: 0;
+    text-align: left;
+    max-height: 300px;
+    overflow-y: auto;
+    color: #aaa;
+}
+
+#historyList li {
+    border-bottom: 1px solid #333;
+    padding: 8px 0;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.9rem;
+}
+
+/* NOVÉ STYLY PRO MODAL */
+
+.modal-content {
+    position: relative;
+    padding-top: 30px;
+}
+
+/* Křížek vpravo nahoře */
+.close-modal-x {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 2rem;
+    font-weight: bold;
+    color: #666;
+    cursor: pointer;
+    line-height: 1;
+    transition: color 0.2s;
+}
+
+.close-modal-x:hover {
+    color: #fff;
+}
+
+/* Finální skóre uprostřed */
+.final-score-box {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    margin: 5px 0 20px 0;
+    font-family: 'Rajdhani', sans-serif;
+}
+
+.score-val {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 4rem;
+    font-weight: 800;
+    line-height: 1;
+}
+
+.score-divider {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 2.5rem;
+    color: #444;
+    margin-top: -10px;
+    /* Vizuální zarovnání */
+}
+
+/* Barvy skóre (využívá tvé existující proměnné) */
+.p-blue {
+    color: var(--pA-lvl1);
+    text-shadow: 0 0 20px rgba(0, 75, 160, 0.3);
+}
+
+.p-red {
+    color: var(--pB-lvl1);
+    text-shadow: 0 0 20px rgba(139, 0, 0, 0.3);
+}
+
+/* Zmenšení jména vítěze, aby skóre vyniklo */
+.winner-name-display {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 1.8rem;
+    margin-bottom: 5px;
+}
+
+
+/* --- RESPONSIVITA PRO MOBILY NA ŠÍŘKU (LANDSCAPE FIX) --- */
+@media screen and (max-height: 500px) {
+
+    /* === 1. OPRAVA MENU (SETUP SCREEN) === */
+    .setup-content {
+        width: 95%;
+        max-width: 800px;
+        /* Aby se využila šířka */
+        padding-top: 0;
     }
 
-    .container {
-        width: 100%;
-        height: 100%;
-        max-width: none;
+    .setup-content h1 {
+        font-family: 'Rajdhani', sans-serif;
+        font-size: 1.5rem;
+        /* Menší nadpis */
+        margin-bottom: 10px;
+        padding-bottom: 5px;
+        border-bottom-width: 2px;
     }
+
+    .setup-group {
+        flex-direction: row;
+        /* Tlačítka VEDLE SEBE */
+        gap: 8px;
+    }
+
+    .setup-group h3 {
+        display: none;
+    }
+
+    .btn-setup {
+        flex: 1;
+        /* Všechna tlačítka stejně široká */
+        padding: 10px 5px;
+        height: auto;
+        min-height: 80px;
+        /* Aby se tam vešel text */
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+    }
+
+    .mode-title {
+        font-family: 'Rajdhani', sans-serif;
+        font-size: 0.9rem;
+        margin-bottom: 3px;
+    }
+
+    .mode-desc {
+        font-family: 'Rajdhani', sans-serif;
+        font-size: 0.65rem;
+        line-height: 1.1;
+        display: block;
+    }
+
+    /* === 2. OPRAVA HERNÍ OBRAZOVKY === */
+    .app-container {
+        height: 100vh;
+        padding: 2px;
+        overflow: hidden;
+    }
+
+    /* Horní panel */
+    .scoreboard-section {
+        padding: 0 10px;
+        margin-bottom: 2px;
+        flex-shrink: 0;
+    }
+
+    .score-big {
+        font-family: 'Rajdhani', sans-serif;
+        font-size: 2.8rem;
+        margin: 0;
+    }
+
+    .player-name {
+        font-family: 'Rajdhani', sans-serif;
+        font-size: 0.75rem;
+        margin-bottom: 0;
+    }
+
+    .set-indicator {
+        font-family: 'Rajdhani', sans-serif;
+        font-size: 0.7rem;
+        padding: 0 5px;
+    }
+
+    .vs-text {
+        font-family: 'Rajdhani', sans-serif;
+        font-size: 0.9rem;
+    }
+
+    .set-label {
+        font-family: 'Rajdhani', sans-serif;
+        font-size: 0.65rem;
+    }
+
+    .mode-label {
+        font-family: 'Rajdhani', sans-serif;
+        font-size: 0.55rem;
+        margin: 0;
+    }
+
+    /* Mřížka ovládání */
+    .controls-section {
+        grid-template-columns: 1fr 80px 1fr;
+        /* Střed jen 80px */
+        gap: 4px;
+        min-height: 0;
+    }
+
+    /* Tlačítka Finish */
+    .btn-finish {
+        padding: 0 5px;
+        min-height: 0;
+    }
+
+    .btn-finish .lbl {
+        font-family: 'Rajdhani', sans-serif;
+        font-size: 0.7rem;
+        letter-spacing: 0;
+    }
+
+    .btn-finish .pts {
+        font-family: 'Rajdhani', sans-serif;
+        font-size: 0.9rem;
+    }
+
+    /* Středová tlačítka */
+    .center-controls {
+        gap: 2px;
+    }
+
+    .btn-utility {
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: 'Rajdhani', sans-serif;
+        font-size: 0.65rem;
+        height: 100%;
+    }
+
+    /* Varování */
+    .btn-warn {
+        height: 25px;
+        font-family: 'Rajdhani', sans-serif;
+        font-size: 0.65rem;
+        margin-top: 2px;
+        padding: 0;
+        line-height: 25px;
+    }
+
+    .btn-menu {
+        margin-top: 0;
+    }
+
+    /* Vložit do sekce pro landscape mobil */
+    .setup-footer {
+        margin-top: 10px;
+        /* Zmenšit mezeru */
+        font-family: 'Rajdhani', sans-serif;
+        font-size: 0.6rem;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .setup-footer p {
+        margin: 0;
+    }
+}
+
+
+/* Extra pojistka pro extrémně nízké displeje */
+@media screen and (max-height: 350px) {
+    .btn-finish .lbl {
+        font-family: 'Rajdhani', sans-serif;
+        font-size: 0.6rem;
+    }
+
+    .score-big {
+        font-family: 'Rajdhani', sans-serif;
+        font-size: 2.2rem;
+    }
+
+    .mode-desc {
+        display: none;
+    }
+
+    /* Skryje popisky v menu, pokud je displej super nízký */
 }

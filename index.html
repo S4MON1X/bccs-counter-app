@@ -1,78 +1,164 @@
 <!DOCTYPE html>
 <html lang="cs">
+
 <head>
     <meta charset="UTF-8">
-    <title>BCCS Offline Score Tracker</title>
-    <link rel="shortcut icon" href="favicon.ico" />
+    <title>BCCS Counter</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
-    <div class="container">
 
-        <div class="score-preview">
-            <div class="score-display-row">
+    <div id="setupScreen" class="setup-screen">
+        <div class="setup-content">
+            <h1>BCCS COUNTER</h1>
+            <div class="setup-group">
+                <h3>VÝBĚR FORMÁTU</h3>
+                <button class="btn-setup" onclick="startGame('bo1')">
+                    <span class="mode-title">BEST OF ONE</span>
+                    <span class="mode-desc">Hraje se do 7 bodů</span>
+                </button>
+                <button class="btn-setup" onclick="startGame('bo3')">
+                    <span class="mode-title">BEST OF THREE</span>
+                    <span class="mode-desc">Hraje se do 2 vyhraných setů po 7 bodech</span>
+                </button>
+                <button class="btn-setup secondary" onclick="startGame('nolimit')">
+                    <span class="mode-title">TRÉNINK (No Limit)</span>
+                    <span class="mode-desc">Trénikový režim nemá limit setů</span>
+                </button>
+            </div>
+            <div class="setup-footer">
+                <p>Made with ❤️ for BCCS by <strong>SAMONIX</strong></p>
+                <span class="version-tag">v2.0</span>
+            </div>
+        </div>
+    </div>
 
-                <div style="width: 40%;">
-                    <div class="player-label">HRÁČ A</div>
-                    <div id="pA_score" class="score-main">0</div>
-                    <div class="set-control-wrapper">
-                        <button class="set-btn" onclick="adjustSet('A', -1)">-</button>
-                        <div id="pA_sets" class="score-sets">Sety: 0</div>
-                        <button class="set-btn" onclick="adjustSet('A', 1)">+</button>
-                    </div>
+    <div id="appContainer" class="app-container hidden">
+
+        <div class="scoreboard-section">
+            <div class="player-score-box">
+                <div class="player-name" contenteditable="true">PLAYER A</div>
+                <div class="score-big" id="scoreA">0</div>
+                <div class="set-indicator" id="setBoxA">
+                    SETY: <span id="setsA">0</span>
                 </div>
+                <div id="warnIndicatorA" class="warn-indicator hidden">⚠️ 2. VAROVÁNÍ</div>
+            </div>
 
-                <div style="font-size: 2em; font-weight: 700;">:</div>
+            <div class="center-info">
+                <div class="vs-text">VS</div>
+                <div class="set-label" id="setLabelBox">SET <span id="currentSetNum">1</span></div>
+                <div class="mode-label" id="matchModeLabel">BO3</div>
+            </div>
 
-                <div style="width: 40%;">
-                    <div class="player-label">HRÁČ B</div>
-                    <div id="pB_score" class="score-main">0</div>
-                    <div class="set-control-wrapper">
-                        <button class="set-btn" onclick="adjustSet('B', -1)">-</button>
-                        <div id="pB_sets" class="score-sets">Sety: 0</div>
-                        <button class="set-btn" onclick="adjustSet('B', 1)">+</button>
-                    </div>
+            <div class="player-score-box">
+                <div class="player-name" contenteditable="true">PLAYER B</div>
+                <div class="score-big" id="scoreB">0</div>
+                <div class="set-indicator" id="setBoxB">
+                    SETY: <span id="setsB">0</span>
                 </div>
+                <div id="warnIndicatorB" class="warn-indicator hidden">⚠️ 2. VAROVÁNÍ</div>
             </div>
         </div>
 
-        <div class="controls-panel">
-            <div class="player-control-area">
+        <div class="controls-section">
 
-                <div id="confirmContainer" class="hidden" style="height: 100%;">
-                    <div class="confirm-grid">
-                        <button class="btn-action-undo" onclick="undoLastAction()">ZPĚT<br><span style="font-size:0.7em; font-weight:normal;">(Opravit)</span></button>
-                        <button class="btn-action-confirm" onclick="confirmSetWin()">POTVRDIT<br>VÍTĚZSTVÍ</button>
-                        <button class="btn-action-reset" onclick="resetScore()">RESET<br><span style="font-size:0.7em; font-weight:normal;">(Celý Zápas)</span></button>
-                    </div>
-                </div>
+            <div class="player-controls">
+                <button class="btn-finish lvl-4" onclick="addScore('A', 3, 'XTR')">
+                    <span class="lbl">Xtreme Finish</span> <span class="pts">+3</span>
+                </button>
+                <button class="btn-finish lvl-3" onclick="addScore('A', 2, 'OVR')">
+                    <span class="lbl">Over Finish</span> <span class="pts">+2</span>
+                </button>
+                <button class="btn-finish lvl-2" onclick="addScore('A', 2, 'BST')">
+                    <span class="lbl">Burst Finish</span> <span class="pts">+2</span>
+                </button>
+                <button class="btn-finish lvl-1" onclick="addScore('A', 1, 'SPF')">
+                    <span class="lbl">Spin Finish</span> <span class="pts">+1</span>
+                </button>
+                <button class="btn-warn" onclick="handleWarning('A')" id="btnWarnA">VAROVÁNÍ</button>
+            </div>
 
-                <div id="scoringControls" class="control-grid-main">
-                    <div class="score-buttons-stack" style="grid-column: 1 / 2;">
-                        <button class="score-btn" onclick="submitScore('A', 1)">+1</button>
-                        <button class="score-btn" onclick="submitScore('A', 2)">+2</button>
-                        <button class="score-btn" onclick="submitScore('A', 3)">+3</button>
-                    </div>
+            <div class="center-controls">
+                <button class="btn-utility btn-undo" onclick="undo()">ZPĚT</button>
+                <button class="btn-utility btn-redo" onclick="redo()">VPŘED</button> <button
+                    class="btn-utility btn-history" onclick="toggleHistory()">LOG</button>
+                <button class="btn-utility btn-reset" onclick="resetMatch()">RESET</button>
+                <button class="btn-utility btn-menu" onclick="showSetup()">MENU</button>
+            </div>
 
-                    <div class="center-controls" style="grid-column: 2 / 3;">
-                        <button class="btn-undo" onclick="undoLastAction()">↩️</button>
-                        <button class="btn-reset" onclick="resetScore()">RESET</button>
-                    </div>
+            <div class="player-controls right-side">
+                <button class="btn-finish lvl-4" onclick="addScore('B', 3, 'XTR')">
+                    <span class="lbl">Xtreme Finish</span> <span class="pts">+3</span>
+                </button>
+                <button class="btn-finish lvl-3" onclick="addScore('B', 2, 'OVR')">
+                    <span class="lbl">Over Finish</span> <span class="pts">+2</span>
+                </button>
+                <button class="btn-finish lvl-2" onclick="addScore('B', 2, 'BST')">
+                    <span class="lbl">Burst Finish</span> <span class="pts">+2</span>
+                </button>
+                <button class="btn-finish lvl-1" onclick="addScore('B', 1, 'SPF')">
+                    <span class="lbl">Spin Finish</span> <span class="pts">+1</span>
+                </button>
+                <button class="btn-warn" onclick="handleWarning('B')" id="btnWarnB">VAROVÁNÍ</button>
+            </div>
+        </div>
 
-                    <div class="score-buttons-stack" style="grid-column: 3 / 4;">
-                        <button class="score-btn" onclick="submitScore('B', 1)">+1</button>
-                        <button class="score-btn" onclick="submitScore('B', 2)">+2</button>
-                        <button class="score-btn" onclick="submitScore('B', 3)">+3</button>
-                    </div>
-                </div>
+    </div>
 
-                <div id="messages" class="messages">Systém připraven.</div>
+    <div id="historyModal" class="modal hidden">
+        <div class="modal-content">
+            <h3>LOG ZÁPASU</h3>
+            <ul id="historyList"></ul>
+            <button class="btn-close" onclick="toggleHistory()">ZAVŘÍT</button>
+        </div>
+    </div>
+
+    <div id="winnerModal" class="modal hidden">
+        <div class="modal-content winner-content">
+            <span class="close-modal-x" onclick="closeWinnerModal()">&times;</span>
+
+            <h2 id="winnerText" style="color: #aaa; font-size: 1rem; margin-bottom: 5px;">VÍTĚZ SETU</h2>
+
+            <div class="winner-name-display" id="winnerNameDisplay">PLAYER A</div>
+
+            <div class="final-score-box">
+                <span id="endScoreA" class="score-val p-blue">0</span>
+                <span class="score-divider">:</span>
+                <span id="endScoreB" class="score-val p-red">0</span>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-item"><span>Xtreme</span> <b id="statXTR">0</b></div>
+                <div class="stat-item"><span>Over</span> <b id="statOVR">0</b></div>
+                <div class="stat-item"><span>Burst</span> <b id="statBST">0</b></div>
+                <div class="stat-item"><span>Spin</span> <b id="statSPF">0</b></div>
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn-next-set" id="btnNextAction" onclick="nextSet()">DALŠÍ SET</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="matchOverModal" class="modal hidden">
+        <div class="modal-content winner-content" style="border-color: gold;">
+            <h2 style="color: gold">🏆 VÍTĚZ ZÁPASU 🏆</h2>
+            <div class="winner-name-display" id="matchWinnerName" style="font-size: 3rem; color: gold;">PLAYER X</div>
+            <div style="margin-bottom: 20px; color: #aaa;">Skóre setů: <span id="finalSetScore"
+                    style="color:white; font-weight:bold;">2:0</span></div>
+
+            <div class="modal-actions">
+                <button class="btn-next-set" onclick="showSetup()">NOVÝ ZÁPAS (MENU)</button>
+                <button class="btn-close-modal" onclick="resetMatch()">REMATCH (STEJNÝ MOD)</button>
             </div>
         </div>
     </div>
 
     <script src="script.js"></script>
 </body>
+
 </html>
