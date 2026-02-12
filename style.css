@@ -33,6 +33,8 @@ body {
     flex-direction: column;
     overflow: hidden;
     user-select: none;
+    height: 100vh;
+    height: 100dvh;
 }
 
 /* --- SETUP SCREEN --- */
@@ -576,7 +578,10 @@ body {
 
 /* --- RESPONSIVITA PRO MOBILY NA ŠÍŘKU (LANDSCAPE FIX) --- */
 @media screen and (max-height: 500px) {
-
+.app-container {
+        height: 100vh;
+        height: 100dvh;
+}
     /* === 1. OPRAVA MENU (SETUP SCREEN) === */
     .setup-content {
         width: 95%;
@@ -760,10 +765,5 @@ body {
         font-family: 'Rajdhani', sans-serif;
         font-size: 2.2rem;
     }
-
-    .mode-desc {
-        display: none;
-    }
-
     /* Skryje popisky v menu, pokud je displej super nízký */
 }
