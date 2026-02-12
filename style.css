@@ -1,0 +1,251 @@
+/* --- Proměnné a základ --- */
+:root {
+    --primary-bg: #111;
+    --card-bg: #222;
+    --text-color: #f8f8f8;
+    --highlight-color: #de0030;
+    --danger-color: #ff3b30;
+    --success-color: #ffffff;
+    --confirm-color: #4cd964;
+    --undo-color: #ffcc00;
+}
+
+body {
+    font-family: sans-serif;
+    background-color: var(--primary-bg);
+    color: var(--text-color);
+    margin: 0;
+    padding: 5px;
+    display: flex;
+    flex-direction: row;
+    min-height: 100vh;
+    max-width: 100vw;
+    overflow: hidden;
+}
+
+.container {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+}
+
+/* 1. SCOREBOARD */
+.score-preview {
+    background-color: var(--card-bg);
+    padding: 5px 15px;
+    border-radius: 8px;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.score-main {
+    font-size: 3em;
+    font-weight: 800;
+    color: var(--success-color);
+    line-height: 1;
+}
+
+.score-sets {
+    font-size: 0.9em;
+    color: #999;
+}
+
+.player-label {
+    font-size: 1em;
+    font-weight: 600;
+    margin-bottom: 2px;
+    color: var(--highlight-color);
+}
+
+.score-display-row {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+
+.set-control-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    margin-top: 5px;
+}
+
+.set-btn {
+    width: 30px;
+    height: 30px;
+    line-height: 28px;
+    font-size: 1.2em;
+    font-weight: 700;
+    background-color: #333;
+    color: white;
+    border: 1px solid #555;
+    border-radius: 4px;
+    cursor: pointer;
+    padding: 0;
+}
+
+/* 2. OVLÁDÁNÍ */
+.controls-panel {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.player-control-area {
+    background-color: var(--card-bg);
+    padding: 10px;
+    border-radius: 8px;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+/* GRID PRO HLAVNÍ OVLÁDÁNÍ */
+.control-grid-main {
+    display: grid;
+    grid-template-columns: 1fr 0.6fr 1fr;
+    gap: 15px;
+    height: 100%;
+    align-items: stretch;
+}
+
+.score-buttons-stack {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 8px;
+    height: 100%;
+}
+
+.score-btn {
+    width: 100%;
+    flex-grow: 1;
+    font-size: 1.6em;
+    font-weight: 800;
+    border-radius: 6px;
+    border: none;
+    background-color: var(--highlight-color);
+    color: white;
+    cursor: pointer;
+}
+
+/* Středový panel (Undo / Reset) */
+.center-controls {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 15px;
+}
+
+.btn-undo {
+    width: 100%;
+    height: 60px;
+    background-color: var(--undo-color);
+    color: #000;
+    font-size: 1em;
+    font-weight: 700;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-reset {
+    width: 100%;
+    height: 60px;
+    background-color: #444;
+    color: white;
+    font-size: 0.9em;
+    font-weight: 600;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+}
+
+/* 3. POTVRZOVACÍ GRID */
+.confirm-grid {
+    display: flex;
+    gap: 10px;
+    height: 100%;
+    align-items: stretch;
+}
+
+.btn-action-confirm {
+    flex: 2;
+    background-color: var(--confirm-color);
+    color: #000;
+    font-size: 1.8em;
+    font-weight: 900;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    animation: pulse 1.5s infinite;
+}
+
+.btn-action-undo {
+    flex: 1;
+    background-color: var(--undo-color);
+    color: #000;
+    font-size: 1.1em;
+    font-weight: 700;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-action-reset {
+    flex: 1;
+    background-color: #222;
+    color: var(--danger-color);
+    font-size: 1em;
+    font-weight: 700;
+    border: 2px solid var(--danger-color);
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+@keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(76, 217, 100, 0.4); }
+    70% { box-shadow: 0 0 0 10px rgba(76, 217, 100, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(76, 217, 100, 0); }
+}
+
+.hidden {
+    display: none !important;
+}
+
+.messages {
+    text-align: center;
+    margin-top: 5px;
+    font-size: 0.9em;
+    color: var(--highlight-color);
+    height: 1.2em;
+}
+
+/* --- VYNUCENÍ LANDSCAPE REŽIMU (CSS HACK) --- */
+@media screen and (orientation: portrait) {
+    body {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100vh;
+        height: 100vw;
+        overflow: hidden;
+        transform: rotate(90deg);
+        transform-origin: bottom left;
+        position: absolute;
+        top: -100vw;
+        left: 0;
+        overflow: hidden;
+        background-color: var(--primary-bg);
+    }
+
+    .container {
+        width: 100%;
+        height: 100%;
+        max-width: none;
+    }
+}

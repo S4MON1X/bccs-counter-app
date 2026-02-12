@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <title>BCCS Offline Score Tracker</title>
+    <link rel="shortcut icon" href="favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+
+        <div class="score-preview">
+            <div class="score-display-row">
+
+                <div style="width: 40%;">
+                    <div class="player-label">HRÁČ A</div>
+                    <div id="pA_score" class="score-main">0</div>
+                    <div class="set-control-wrapper">
+                        <button class="set-btn" onclick="adjustSet('A', -1)">-</button>
+                        <div id="pA_sets" class="score-sets">Sety: 0</div>
+                        <button class="set-btn" onclick="adjustSet('A', 1)">+</button>
+                    </div>
+                </div>
+
+                <div style="font-size: 2em; font-weight: 700;">:</div>
+
+                <div style="width: 40%;">
+                    <div class="player-label">HRÁČ B</div>
+                    <div id="pB_score" class="score-main">0</div>
+                    <div class="set-control-wrapper">
+                        <button class="set-btn" onclick="adjustSet('B', -1)">-</button>
+                        <div id="pB_sets" class="score-sets">Sety: 0</div>
+                        <button class="set-btn" onclick="adjustSet('B', 1)">+</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="controls-panel">
+            <div class="player-control-area">
+
+                <div id="confirmContainer" class="hidden" style="height: 100%;">
+                    <div class="confirm-grid">
+                        <button class="btn-action-undo" onclick="undoLastAction()">ZPĚT<br><span style="font-size:0.7em; font-weight:normal;">(Opravit)</span></button>
+                        <button class="btn-action-confirm" onclick="confirmSetWin()">POTVRDIT<br>VÍTĚZSTVÍ</button>
+                        <button class="btn-action-reset" onclick="resetScore()">RESET<br><span style="font-size:0.7em; font-weight:normal;">(Celý Zápas)</span></button>
+                    </div>
+                </div>
+
+                <div id="scoringControls" class="control-grid-main">
+                    <div class="score-buttons-stack" style="grid-column: 1 / 2;">
+                        <button class="score-btn" onclick="submitScore('A', 1)">+1</button>
+                        <button class="score-btn" onclick="submitScore('A', 2)">+2</button>
+                        <button class="score-btn" onclick="submitScore('A', 3)">+3</button>
+                    </div>
+
+                    <div class="center-controls" style="grid-column: 2 / 3;">
+                        <button class="btn-undo" onclick="undoLastAction()">↩️</button>
+                        <button class="btn-reset" onclick="resetScore()">RESET</button>
+                    </div>
+
+                    <div class="score-buttons-stack" style="grid-column: 3 / 4;">
+                        <button class="score-btn" onclick="submitScore('B', 1)">+1</button>
+                        <button class="score-btn" onclick="submitScore('B', 2)">+2</button>
+                        <button class="score-btn" onclick="submitScore('B', 3)">+3</button>
+                    </div>
+                </div>
+
+                <div id="messages" class="messages">Systém připraven.</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
