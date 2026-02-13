@@ -362,11 +362,33 @@ body {
     cursor: pointer;
     margin-top: 5px;
     border-radius: 4px;
+    transition: all 0.2s;
 }
 
+/* Aktivní stav tlačítka (když má hráč jakékoliv varování) */
 .btn-warn.active {
+    background-color: rgba(255, 204, 0, 0.2); 
+}
+
+/* Indikátor pod jménem hráče */
+.warn-indicator {
     background-color: var(--accent-yellow);
     color: #000;
+    font-weight: bold;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.8rem;
+    padding: 3px 8px;
+    margin-top: 5px;
+    border-radius: 4px;
+    animation: flash 1s infinite;
+    text-transform: uppercase;
+    display: inline-block;
+}
+
+@keyframes flash {
+    0% { opacity: 1; }
+    50% { opacity: 0.6; }
+    100% { opacity: 1; }
 }
 
 /* STŘEDOVÉ NÁSTROJE */

@@ -27,7 +27,6 @@ function showSetup() {
 function startGame(mode) {
     matchConfig.mode = mode;
 
-    // Logika zobrazení setů podle módu
     const setBoxes = [document.getElementById('setBoxA'), document.getElementById('setBoxB'), document.getElementById('setLabelBox')];
 
     if (mode === 'bo1') {
@@ -56,26 +55,18 @@ function startGame(mode) {
 /* --- 2. HERNÍ LOGIKA --- */
 
 function saveState() {
-    // Uložíme do historie
     state.history.push(JSON.parse(JSON.stringify(state)));
     if (state.history.length > 20) state.history.shift();
-
-    // JAKÁKOLIV nová akce vymaže Redo zásobník (už nejde jít "dopředu" jinou větví)
     state.redoStack = [];
 }
 
 function undo() {
     if (state.history.length === 0) return;
-
-    // Uložíme aktuální stav do REDO zásobníku
     let currentStateToSave = JSON.parse(JSON.stringify(state));
-
-
     state.redoStack.push(currentStateToSave);
 
     const prevHistory = state.history;
     const prevRedo = state.redoStack;
-
     const lastState = prevHistory.pop();
 
     state = lastState;
@@ -87,8 +78,6 @@ function undo() {
 
 function redo() {
     if (state.redoStack.length === 0) return;
-
-    // Uložíme aktuální (starý) stav do historie (jako bychom udělali akci)
     state.history.push(JSON.parse(JSON.stringify(state)));
 
     const nextState = state.redoStack.pop();
@@ -96,7 +85,6 @@ function redo() {
     const currentRedo = state.redoStack;
 
     state = nextState;
-    // Obnovíme správné pole historie a redo
     state.history = currentHistory;
     state.redoStack = currentRedo;
 
@@ -121,26 +109,33 @@ function addScore(player, points, type) {
     updateUI();
 }
 
+/* --- NOVÁ LOGIKA VAROVÁNÍ (Žlutá -> Červená -> Strike) --- */
 function handleWarning(player) {
     saveState();
     const isPlayerA = player === 'A';
-    const currentWarn = isPlayerA ? state.warningA : state.warningB;
     const playerName = getPlayerName(player);
+    
+    let currentWarn = isPlayerA ? state.warningA : state.warningB;
 
     if (currentWarn === 0) {
         if (isPlayerA) state.warningA = 1; else state.warningB = 1;
-        addToLog(`${playerName}: ⚠️ První varování`);
-    } else {
-        if (isPlayerA) {
-            state.warningA = 0;
-            state.scoreB = Math.min(state.scoreB + 1, matchConfig.pointsToWinSet);
-        }
-        else {
-            state.warningB = 0;
-            state.scoreA = Math.min(state.scoreA + 1, matchConfig.pointsToWinSet);
-        }
-        addToLog(`${playerName}: 🟥 Druhé varování -> Bod pro soupeře`);
+        addToLog(`${playerName}: 1. Varování (Žlutá)`);
+    } 
+    else if (currentWarn === 1) {
+        if (isPlayerA) state.warningA = 2; else state.warningB = 2;
+        addToLog(`${playerName}: 2. Varování (Červená)`);
     }
+    else {
+        if (isPlayerA) {
+            state.warningA = 0; // Reset
+            state.scoreB = Math.min(state.scoreB + 1, matchConfig.pointsToWinSet); // Bod pro B
+        } else {
+            state.warningB = 0; // Reset
+            state.scoreA = Math.min(state.scoreA + 1, matchConfig.pointsToWinSet); // Bod pro A
+        }
+        addToLog(`${playerName}: STRIKE! (+1 bod soupeři)`);
+    }
+    
     checkSetWin();
     updateUI();
 }
@@ -160,15 +155,12 @@ function showWinnerModal(winnerCode) {
     const winnerName = getPlayerName(winnerCode);
 
     nameDisplay.textContent = winnerName;
-
-    // Barva jména
     if (winnerCode === 'A') nameDisplay.style.color = "var(--pA-lvl1)";
     else nameDisplay.style.color = "var(--pB-lvl1)";
 
     document.getElementById('endScoreA').textContent = state.scoreA;
     document.getElementById('endScoreB').textContent = state.scoreB;
 
-    // Statistiky
     document.getElementById('statXTR').textContent = state.stats.XTR;
     document.getElementById('statOVR').textContent = state.stats.OVR;
     document.getElementById('statBST').textContent = state.stats.BST;
@@ -191,7 +183,7 @@ function showWinnerModal(winnerCode) {
 }
 
 function nextSet() {
-    saveState(); // Uložit konec setu
+    saveState();
 
     let winner = null;
     if (state.scoreA >= matchConfig.pointsToWinSet) winner = 'A';
@@ -251,19 +243,52 @@ function updateUI() {
     document.getElementById('setsB').textContent = state.setsB;
     document.getElementById('currentSetNum').textContent = state.currentSet;
 
-    toggleElement('warnIndicatorA', state.warningA > 0);
-    toggleElement('warnIndicatorB', state.warningB > 0);
+    // --- ZOBRAZENÍ VAROVÁNÍ (Barvy + Text) ---
+    const warnA = document.getElementById('warnIndicatorA');
+    const warnB = document.getElementById('warnIndicatorB');
+    
+    // Logika zobrazení pro A
+    if (state.warningA === 0) warnA.classList.add('hidden');
+    else {
+        warnA.classList.remove('hidden');
+        if (state.warningA === 1) {
+            warnA.textContent = "1. VAROVÁNÍ";
+            warnA.style.backgroundColor = "#ffcc00"; // Žlutá
+            warnA.style.color = "black";
+        } else {
+            warnA.textContent = "2. VAROVÁNÍ";
+            warnA.style.backgroundColor = "#ff4444"; // Červená
+            warnA.style.color = "white";
+        }
+    }
 
-    // Barvy tlačítek varování
+    // Logika zobrazení pro B
+    if (state.warningB === 0) warnB.classList.add('hidden');
+    else {
+        warnB.classList.remove('hidden');
+        if (state.warningB === 1) {
+            warnB.textContent = "1. VAROVÁNÍ";
+            warnB.style.backgroundColor = "#ffcc00";
+            warnB.style.color = "black";
+        } else {
+            warnB.textContent = "2. VAROVÁNÍ";
+            warnB.style.backgroundColor = "#ff4444";
+            warnB.style.color = "white";
+        }
+    }
+
+    // Barvy tlačítek podle stavu
     const btnWarnA = document.getElementById('btnWarnA');
-    btnWarnA.style.borderColor = state.warningA > 0 ? "red" : "#ffcc00";
-    btnWarnA.style.color = state.warningA > 0 ? "red" : "#ffcc00";
+    btnWarnA.style.borderColor = state.warningA === 2 ? "#ff4444" : "#ffcc00";
+    btnWarnA.style.color = state.warningA === 2 ? "#ff4444" : "#ffcc00";
+    if(state.warningA > 0) btnWarnA.classList.add('active'); else btnWarnA.classList.remove('active');
 
     const btnWarnB = document.getElementById('btnWarnB');
-    btnWarnB.style.borderColor = state.warningB > 0 ? "red" : "#ffcc00";
-    btnWarnB.style.color = state.warningB > 0 ? "red" : "#ffcc00";
+    btnWarnB.style.borderColor = state.warningB === 2 ? "#ff4444" : "#ffcc00";
+    btnWarnB.style.color = state.warningB === 2 ? "#ff4444" : "#ffcc00";
+    if(state.warningB > 0) btnWarnB.classList.add('active'); else btnWarnB.classList.remove('active');
 
-    // Aktivita Redo tlačítka
+
     const btnRedo = document.querySelector('.btn-redo');
     if (state.redoStack.length > 0) btnRedo.style.opacity = "1";
     else btnRedo.style.opacity = "0.3";
