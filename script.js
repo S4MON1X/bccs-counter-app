@@ -94,6 +94,9 @@ function redo() {
 function addScore(player, points, type) {
     saveState();
 
+    state.warningA = 0;
+    state.warningB = 0;
+
     if (player === 'A') {
         state.scoreA = Math.min(state.scoreA + points, matchConfig.pointsToWinSet);
     } else {
