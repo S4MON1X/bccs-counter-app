@@ -319,3 +319,20 @@ function getPlayerName(playerCode) {
 function toggleElement(id, show) {
     const el = document.getElementById(id); if (show) el.classList.remove('hidden'); else el.classList.add('hidden');
 }
+
+/* --- NAČTENÍ JMÉN Z URL (PŘI PŘÍCHODU Z DECKLISTU) --- */
+window.addEventListener('DOMContentLoaded', () => {
+    const params = new URLSearchParams(window.location.search);
+    const playerA = params.get('pA');
+    const playerB = params.get('pB');
+
+    const nameDivs = document.querySelectorAll('.player-name');
+
+    if (playerA && nameDivs.length > 0) {
+        nameDivs[0].textContent = playerA;
+    }
+    
+    if (playerB && nameDivs.length > 1) {
+        nameDivs[1].textContent = playerB;
+    }
+});
