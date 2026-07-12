@@ -1,4 +1,6 @@
 /* --- KONFIGURACE A PROMĚNNÉ --- */
+const STORAGE_KEY = 'bccs_match_v1';
+
 let matchConfig = {
     mode: 'bo3',
     setsToWin: 2,
@@ -13,8 +15,54 @@ let state = {
     history: [],
     redoStack: [],
     logs: [],
-    stats: { XTR: 0, OVR: 0, BST: 0, SPF: 0 }
+    stats: { XTR: 0, OVR: 0, BST: 0, SPF: 0 },
+    playerNameA: null, playerNameB: null
 };
+
+/* --- PERZISTENCE (localStorage) --- */
+function saveMatchToStorage() {
+    try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({ matchConfig, state }));
+    } catch (e) {
+        // best-effort: quota exceeded, private browsing, etc. — persistence is optional
+    }
+}
+
+function loadMatchFromStorage() {
+    let raw;
+    try {
+        raw = localStorage.getItem(STORAGE_KEY);
+    } catch (e) {
+        return null;
+    }
+    if (!raw) return null;
+
+    let parsed;
+    try {
+        parsed = JSON.parse(raw);
+    } catch (e) {
+        clearMatchStorage();
+        return null;
+    }
+
+    if (!parsed || typeof parsed !== 'object') return null;
+    if (!parsed.matchConfig || !parsed.state) return null;
+
+    const s = parsed.state;
+    const validState = typeof s.scoreA === 'number' && typeof s.scoreB === 'number' &&
+        typeof s.setsA === 'number' && typeof s.setsB === 'number' &&
+        typeof s.currentSet === 'number' && Array.isArray(s.history) &&
+        Array.isArray(s.redoStack) && Array.isArray(s.logs) && !!s.stats;
+
+    if (!validState) return null;
+    return parsed;
+}
+
+function clearMatchStorage() {
+    try {
+        localStorage.removeItem(STORAGE_KEY);
+    } catch (e) {}
+}
 
 /* --- 1. SETUP A START --- */
 function showSetup() {
