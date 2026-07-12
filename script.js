@@ -282,9 +282,11 @@ function resetMatchData() {
     state = {
         scoreA: 0, scoreB: 0, setsA: 0, setsB: 0, warningA: 0, warningB: 0,
         currentSet: 1, history: [], redoStack: [], logs: [],
-        stats: { XTR: 0, OVR: 0, BST: 0, SPF: 0 }
+        stats: { XTR: 0, OVR: 0, BST: 0, SPF: 0 },
+        playerNameA: null, playerNameB: null
     };
     document.getElementById('historyList').innerHTML = '';
+    clearMatchStorage();
 }
 
 function updateUI() {
@@ -370,16 +372,23 @@ function toggleElement(id, show) {
 
 /* --- NAČTENÍ JMÉN Z URL (PŘI PŘÍCHODU Z DECKLISTU) --- */
 window.addEventListener('DOMContentLoaded', () => {
+    const nameDivs = document.querySelectorAll('.player-name');
+    nameDivs.forEach((el, idx) => {
+        el.addEventListener('blur', () => {
+            if (idx === 0) state.playerNameA = el.textContent;
+            else state.playerNameB = el.textContent;
+            saveMatchToStorage();
+        });
+    });
+
     const params = new URLSearchParams(window.location.search);
     const playerA = params.get('pA');
     const playerB = params.get('pB');
 
-    const nameDivs = document.querySelectorAll('.player-name');
-
     if (playerA && nameDivs.length > 0) {
         nameDivs[0].textContent = playerA;
     }
-    
+
     if (playerB && nameDivs.length > 1) {
         nameDivs[1].textContent = playerB;
     }
