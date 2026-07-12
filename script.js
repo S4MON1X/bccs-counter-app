@@ -72,32 +72,50 @@ function showSetup() {
     document.getElementById('matchOverModal').classList.add('hidden');
 }
 
-function startGame(mode) {
-    matchConfig.mode = mode;
-
+function applyModeUI(mode) {
     const setBoxes = [document.getElementById('setBoxA'), document.getElementById('setBoxB'), document.getElementById('setLabelBox')];
 
     if (mode === 'bo1') {
-        matchConfig.setsToWin = 1;
         document.getElementById('matchModeLabel').textContent = "BEST OF ONE";
         setBoxes.forEach(el => el.classList.add('invisible'));
     } else {
         setBoxes.forEach(el => el.classList.remove('invisible'));
 
         if (mode === 'bo3') {
-            matchConfig.setsToWin = 2;
             document.getElementById('matchModeLabel').textContent = "BEST OF THREE";
         } else {
-            matchConfig.setsToWin = 999;
             document.getElementById('matchModeLabel').textContent = "NO LIMIT";
         }
     }
+}
 
+function hasMatchProgress() {
+    return state.scoreA > 0 || state.scoreB > 0 || state.setsA > 0 || state.setsB > 0 ||
+        state.currentSet > 1 || state.warningA > 0 || state.warningB > 0;
+}
+
+function startGame(mode) {
+    if (hasMatchProgress()) {
+        if (!confirm("Máte rozehraný zápas, opravdu chcete začít nový?")) return;
+    }
+
+    matchConfig.mode = mode;
+
+    if (mode === 'bo1') {
+        matchConfig.setsToWin = 1;
+    } else if (mode === 'bo3') {
+        matchConfig.setsToWin = 2;
+    } else {
+        matchConfig.setsToWin = 999;
+    }
+
+    applyModeUI(mode);
     resetMatchData();
     updateUI();
     document.getElementById('setupScreen').classList.add('hidden');
     document.getElementById('appContainer').classList.remove('hidden');
     addToLog(`Nová hra spuštěna: ${document.getElementById('matchModeLabel').textContent}`);
+    saveMatchToStorage();
 }
 
 /* --- 2. HERNÍ LOGIKA --- */
