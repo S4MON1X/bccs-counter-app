@@ -22,7 +22,8 @@ let state = {
 /* --- PERZISTENCE (localStorage) --- */
 function saveMatchToStorage() {
     try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify({ matchConfig, state }));
+        const stateToStore = { ...state, history: [], redoStack: [] };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({ matchConfig, state: stateToStore }));
     } catch (e) {
         // best-effort: quota exceeded, private browsing, etc. — persistence is optional
     }
@@ -303,11 +304,15 @@ function resetMatch() {
 }
 
 function resetMatchData() {
+    const nameDivs = document.querySelectorAll('.player-name');
+    const currentNameA = nameDivs.length > 0 ? nameDivs[0].textContent : null;
+    const currentNameB = nameDivs.length > 1 ? nameDivs[1].textContent : null;
+
     state = {
         scoreA: 0, scoreB: 0, setsA: 0, setsB: 0, warningA: 0, warningB: 0,
         currentSet: 1, history: [], redoStack: [], logs: [],
         stats: { XTR: 0, OVR: 0, BST: 0, SPF: 0 },
-        playerNameA: null, playerNameB: null
+        playerNameA: currentNameA, playerNameB: currentNameB
     };
     document.getElementById('historyList').innerHTML = '';
     clearMatchStorage();
