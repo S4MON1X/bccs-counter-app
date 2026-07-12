@@ -1,4 +1,6 @@
 /* --- KONFIGURACE A PROMĚNNÉ --- */
+const STORAGE_KEY = 'bccs_match_v1';
+
 let matchConfig = {
     mode: 'bo3',
     setsToWin: 2,
@@ -13,8 +15,55 @@ let state = {
     history: [],
     redoStack: [],
     logs: [],
-    stats: { XTR: 0, OVR: 0, BST: 0, SPF: 0 }
+    stats: { XTR: 0, OVR: 0, BST: 0, SPF: 0 },
+    playerNameA: null, playerNameB: null
 };
+
+/* --- PERZISTENCE (localStorage) --- */
+function saveMatchToStorage() {
+    try {
+        const stateToStore = { ...state, history: [], redoStack: [] };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({ matchConfig, state: stateToStore }));
+    } catch (e) {
+        // best-effort: quota exceeded, private browsing, etc. — persistence is optional
+    }
+}
+
+function loadMatchFromStorage() {
+    let raw;
+    try {
+        raw = localStorage.getItem(STORAGE_KEY);
+    } catch (e) {
+        return null;
+    }
+    if (!raw) return null;
+
+    let parsed;
+    try {
+        parsed = JSON.parse(raw);
+    } catch (e) {
+        clearMatchStorage();
+        return null;
+    }
+
+    if (!parsed || typeof parsed !== 'object') return null;
+    if (!parsed.matchConfig || !parsed.state) return null;
+
+    const s = parsed.state;
+    const validState = typeof s.scoreA === 'number' && typeof s.scoreB === 'number' &&
+        typeof s.setsA === 'number' && typeof s.setsB === 'number' &&
+        typeof s.currentSet === 'number' && Array.isArray(s.history) &&
+        Array.isArray(s.redoStack) && Array.isArray(s.logs) && !!s.stats;
+
+    if (!validState) return null;
+    return parsed;
+}
+
+function clearMatchStorage() {
+    try {
+        localStorage.removeItem(STORAGE_KEY);
+    } catch (e) {}
+}
 
 /* --- 1. SETUP A START --- */
 function showSetup() {
@@ -24,32 +73,50 @@ function showSetup() {
     document.getElementById('matchOverModal').classList.add('hidden');
 }
 
-function startGame(mode) {
-    matchConfig.mode = mode;
-
+function applyModeUI(mode) {
     const setBoxes = [document.getElementById('setBoxA'), document.getElementById('setBoxB'), document.getElementById('setLabelBox')];
 
     if (mode === 'bo1') {
-        matchConfig.setsToWin = 1;
         document.getElementById('matchModeLabel').textContent = "BEST OF ONE";
         setBoxes.forEach(el => el.classList.add('invisible'));
     } else {
         setBoxes.forEach(el => el.classList.remove('invisible'));
 
         if (mode === 'bo3') {
-            matchConfig.setsToWin = 2;
             document.getElementById('matchModeLabel').textContent = "BEST OF THREE";
         } else {
-            matchConfig.setsToWin = 999;
             document.getElementById('matchModeLabel').textContent = "NO LIMIT";
         }
     }
+}
 
+function hasMatchProgress() {
+    return state.scoreA > 0 || state.scoreB > 0 || state.setsA > 0 || state.setsB > 0 ||
+        state.currentSet > 1 || state.warningA > 0 || state.warningB > 0;
+}
+
+function startGame(mode) {
+    if (hasMatchProgress()) {
+        if (!confirm("Máte rozehraný zápas, opravdu chcete začít nový?")) return;
+    }
+
+    matchConfig.mode = mode;
+
+    if (mode === 'bo1') {
+        matchConfig.setsToWin = 1;
+    } else if (mode === 'bo3') {
+        matchConfig.setsToWin = 2;
+    } else {
+        matchConfig.setsToWin = 999;
+    }
+
+    applyModeUI(mode);
     resetMatchData();
     updateUI();
     document.getElementById('setupScreen').classList.add('hidden');
     document.getElementById('appContainer').classList.remove('hidden');
     addToLog(`Nová hra spuštěna: ${document.getElementById('matchModeLabel').textContent}`);
+    saveMatchToStorage();
 }
 
 /* --- 2. HERNÍ LOGIKA --- */
@@ -74,6 +141,7 @@ function undo() {
     state.redoStack = prevRedo;
 
     updateUI();
+    saveMatchToStorage();
 }
 
 function redo() {
@@ -89,6 +157,7 @@ function redo() {
     state.redoStack = currentRedo;
 
     updateUI();
+    saveMatchToStorage();
 }
 
 function addScore(player, points, type) {
@@ -110,6 +179,7 @@ function addScore(player, points, type) {
     if (state.stats[type] !== undefined) state.stats[type]++;
     checkSetWin();
     updateUI();
+    saveMatchToStorage();
 }
 
 /* --- NOVÁ LOGIKA VAROVÁNÍ (Žlutá -> Červená -> Strike) --- */
@@ -141,6 +211,7 @@ function handleWarning(player) {
     
     checkSetWin();
     updateUI();
+    saveMatchToStorage();
 }
 
 function checkSetWin() {
@@ -197,6 +268,7 @@ function nextSet() {
 
     if (matchConfig.mode !== 'nolimit') {
         if (state.setsA >= matchConfig.setsToWin || state.setsB >= matchConfig.setsToWin) {
+            saveMatchToStorage();
             showMatchOverModal(state.setsA >= matchConfig.setsToWin ? 'A' : 'B');
             return;
         }
@@ -208,6 +280,7 @@ function nextSet() {
     state.currentSet++;
     addToLog(`--- ZAČÁTEK SETU ${state.currentSet} ---`);
     updateUI();
+    saveMatchToStorage();
 }
 
 function showMatchOverModal(winnerCode) {
@@ -231,12 +304,18 @@ function resetMatch() {
 }
 
 function resetMatchData() {
+    const nameDivs = document.querySelectorAll('.player-name');
+    const currentNameA = nameDivs.length > 0 ? nameDivs[0].textContent : null;
+    const currentNameB = nameDivs.length > 1 ? nameDivs[1].textContent : null;
+
     state = {
         scoreA: 0, scoreB: 0, setsA: 0, setsB: 0, warningA: 0, warningB: 0,
         currentSet: 1, history: [], redoStack: [], logs: [],
-        stats: { XTR: 0, OVR: 0, BST: 0, SPF: 0 }
+        stats: { XTR: 0, OVR: 0, BST: 0, SPF: 0 },
+        playerNameA: currentNameA, playerNameB: currentNameB
     };
     document.getElementById('historyList').innerHTML = '';
+    clearMatchStorage();
 }
 
 function updateUI() {
@@ -322,17 +401,53 @@ function toggleElement(id, show) {
 
 /* --- NAČTENÍ JMÉN Z URL (PŘI PŘÍCHODU Z DECKLISTU) --- */
 window.addEventListener('DOMContentLoaded', () => {
+    const nameDivs = document.querySelectorAll('.player-name');
+    nameDivs.forEach((el, idx) => {
+        el.addEventListener('blur', () => {
+            if (idx === 0) state.playerNameA = el.textContent;
+            else state.playerNameB = el.textContent;
+            saveMatchToStorage();
+        });
+    });
+
+    const restored = loadMatchFromStorage();
+    if (restored) {
+        matchConfig = restored.matchConfig;
+        state = restored.state;
+        applyRestoredMatchUI();
+        return;
+    }
+
     const params = new URLSearchParams(window.location.search);
     const playerA = params.get('pA');
     const playerB = params.get('pB');
 
-    const nameDivs = document.querySelectorAll('.player-name');
-
     if (playerA && nameDivs.length > 0) {
         nameDivs[0].textContent = playerA;
     }
-    
+
     if (playerB && nameDivs.length > 1) {
         nameDivs[1].textContent = playerB;
     }
 });
+
+function applyRestoredMatchUI() {
+    document.getElementById('setupScreen').classList.add('hidden');
+    document.getElementById('appContainer').classList.remove('hidden');
+
+    applyModeUI(matchConfig.mode);
+
+    const nameDivs = document.querySelectorAll('.player-name');
+    if (state.playerNameA && nameDivs.length > 0) nameDivs[0].textContent = state.playerNameA;
+    if (state.playerNameB && nameDivs.length > 1) nameDivs[1].textContent = state.playerNameB;
+
+    updateUI();
+
+    if (matchConfig.mode !== 'nolimit' && (state.setsA >= matchConfig.setsToWin || state.setsB >= matchConfig.setsToWin)) {
+        showMatchOverModal(state.setsA >= matchConfig.setsToWin ? 'A' : 'B');
+    } else if (state.scoreA >= matchConfig.pointsToWinSet) {
+        showWinnerModal('A');
+    } else if (state.scoreB >= matchConfig.pointsToWinSet) {
+        showWinnerModal('B');
+    }
+}
