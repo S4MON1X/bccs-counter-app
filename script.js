@@ -405,6 +405,14 @@ window.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    const restored = loadMatchFromStorage();
+    if (restored) {
+        matchConfig = restored.matchConfig;
+        state = restored.state;
+        applyRestoredMatchUI();
+        return;
+    }
+
     const params = new URLSearchParams(window.location.search);
     const playerA = params.get('pA');
     const playerB = params.get('pB');
@@ -417,3 +425,24 @@ window.addEventListener('DOMContentLoaded', () => {
         nameDivs[1].textContent = playerB;
     }
 });
+
+function applyRestoredMatchUI() {
+    document.getElementById('setupScreen').classList.add('hidden');
+    document.getElementById('appContainer').classList.remove('hidden');
+
+    applyModeUI(matchConfig.mode);
+
+    const nameDivs = document.querySelectorAll('.player-name');
+    if (state.playerNameA && nameDivs.length > 0) nameDivs[0].textContent = state.playerNameA;
+    if (state.playerNameB && nameDivs.length > 1) nameDivs[1].textContent = state.playerNameB;
+
+    updateUI();
+
+    if (matchConfig.mode !== 'nolimit' && (state.setsA >= matchConfig.setsToWin || state.setsB >= matchConfig.setsToWin)) {
+        showMatchOverModal(state.setsA >= matchConfig.setsToWin ? 'A' : 'B');
+    } else if (state.scoreA >= matchConfig.pointsToWinSet) {
+        showWinnerModal('A');
+    } else if (state.scoreB >= matchConfig.pointsToWinSet) {
+        showWinnerModal('B');
+    }
+}
