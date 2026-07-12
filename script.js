@@ -122,6 +122,7 @@ function undo() {
     state.redoStack = prevRedo;
 
     updateUI();
+    saveMatchToStorage();
 }
 
 function redo() {
@@ -137,6 +138,7 @@ function redo() {
     state.redoStack = currentRedo;
 
     updateUI();
+    saveMatchToStorage();
 }
 
 function addScore(player, points, type) {
@@ -158,6 +160,7 @@ function addScore(player, points, type) {
     if (state.stats[type] !== undefined) state.stats[type]++;
     checkSetWin();
     updateUI();
+    saveMatchToStorage();
 }
 
 /* --- NOVÁ LOGIKA VAROVÁNÍ (Žlutá -> Červená -> Strike) --- */
@@ -189,6 +192,7 @@ function handleWarning(player) {
     
     checkSetWin();
     updateUI();
+    saveMatchToStorage();
 }
 
 function checkSetWin() {
@@ -245,6 +249,7 @@ function nextSet() {
 
     if (matchConfig.mode !== 'nolimit') {
         if (state.setsA >= matchConfig.setsToWin || state.setsB >= matchConfig.setsToWin) {
+            saveMatchToStorage();
             showMatchOverModal(state.setsA >= matchConfig.setsToWin ? 'A' : 'B');
             return;
         }
@@ -256,6 +261,7 @@ function nextSet() {
     state.currentSet++;
     addToLog(`--- ZAČÁTEK SETU ${state.currentSet} ---`);
     updateUI();
+    saveMatchToStorage();
 }
 
 function showMatchOverModal(winnerCode) {
