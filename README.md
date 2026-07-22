@@ -1,4 +1,4 @@
-# BCCS Counter App v2.1
+# BCCS Counter App v2.2
 
 Jednoduchý webový počítač skóre pro Turnaje pořádané BCCS.
 
