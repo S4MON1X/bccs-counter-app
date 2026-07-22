@@ -71,6 +71,23 @@ function showSetup() {
     document.getElementById('appContainer').classList.add('hidden');
     document.getElementById('winnerModal').classList.add('hidden');
     document.getElementById('matchOverModal').classList.add('hidden');
+
+    const btnContinue = document.getElementById('btnContinueMatch');
+    if (hasMatchProgress()) {
+        btnContinue.classList.remove('hidden');
+        document.getElementById('continueMatchDesc').textContent = buildContinueMatchDesc();
+    } else {
+        btnContinue.classList.add('hidden');
+    }
+}
+
+function buildContinueMatchDesc() {
+    const modeLabel = matchConfig.mode === 'bo1' ? 'BEST OF ONE'
+        : matchConfig.mode === 'bo3' ? 'BEST OF THREE' : 'NO LIMIT';
+    if (matchConfig.mode === 'bo1') {
+        return `${modeLabel} — ${state.scoreA}:${state.scoreB}`;
+    }
+    return `${modeLabel} — SET ${state.currentSet} — ${state.scoreA}:${state.scoreB}`;
 }
 
 function applyModeUI(mode) {

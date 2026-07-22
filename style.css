@@ -111,6 +111,11 @@ body {
     color: var(--accent-yellow);
 }
 
+.btn-setup.continue {
+    border-color: var(--highlight-color);
+    margin-top: 15px;
+}
+
 .setup-footer {
     margin-top: 30px;
     color: #555;
