@@ -115,7 +115,6 @@ function startGame(mode) {
     updateUI();
     document.getElementById('setupScreen').classList.add('hidden');
     document.getElementById('appContainer').classList.remove('hidden');
-    addToLog(`Nová hra spuštěna: ${document.getElementById('matchModeLabel').textContent}`);
     saveMatchToStorage();
 }
 
@@ -172,11 +171,26 @@ function addScore(player, points, type) {
         state.scoreB = Math.min(state.scoreB + points, matchConfig.pointsToWinSet);
     }
 
-    const playerName = getPlayerName(player);
-    let typeFull = type === 'XTR' ? 'Xtreme' : type === 'OVR' ? 'Over' : type === 'BST' ? 'Burst' : 'Spin';
-    addToLog(`${playerName}: +${points} (${typeFull})`);
-
     if (state.stats[type] !== undefined) state.stats[type]++;
+
+    const scoreOwn = player === 'A' ? state.scoreA : state.scoreB;
+    const scoreOpp = player === 'A' ? state.scoreB : state.scoreA;
+    const setsWonBefore = player === 'A' ? state.setsA : state.setsB;
+    const isSetWinner = scoreOwn >= matchConfig.pointsToWinSet;
+
+    state.logs.unshift({
+        type: 'score',
+        player: player,
+        pointsType: type,
+        points: points,
+        scoreOwn: scoreOwn,
+        scoreOpp: scoreOpp,
+        setsWonDisplay: setsWonBefore + (isSetWinner ? 1 : 0),
+        setNumber: state.currentSet,
+        winningPlayer: isSetWinner ? player : null,
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+    });
+
     checkSetWin();
     updateUI();
     saveMatchToStorage();
@@ -186,29 +200,69 @@ function addScore(player, points, type) {
 function handleWarning(player) {
     saveState();
     const isPlayerA = player === 'A';
-    const playerName = getPlayerName(player);
-    
+
     let currentWarn = isPlayerA ? state.warningA : state.warningB;
+    const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    const setsWonDisplay = isPlayerA ? state.setsA : state.setsB;
 
     if (currentWarn === 0) {
         if (isPlayerA) state.warningA = 1; else state.warningB = 1;
-        addToLog(`${playerName}: 1. Varování (Žlutá)`);
-    } 
+        state.logs.unshift({
+            type: 'warning1',
+            player: player,
+            pointsType: null,
+            points: null,
+            scoreOwn: isPlayerA ? state.scoreA : state.scoreB,
+            scoreOpp: isPlayerA ? state.scoreB : state.scoreA,
+            setsWonDisplay: setsWonDisplay,
+            setNumber: state.currentSet,
+            winningPlayer: null,
+            time: time
+        });
+    }
     else if (currentWarn === 1) {
         if (isPlayerA) state.warningA = 2; else state.warningB = 2;
-        addToLog(`${playerName}: 2. Varování (Červená)`);
+        state.logs.unshift({
+            type: 'warning2',
+            player: player,
+            pointsType: null,
+            points: null,
+            scoreOwn: isPlayerA ? state.scoreA : state.scoreB,
+            scoreOpp: isPlayerA ? state.scoreB : state.scoreA,
+            setsWonDisplay: setsWonDisplay,
+            setNumber: state.currentSet,
+            winningPlayer: null,
+            time: time
+        });
     }
     else {
+        let opponentScore;
         if (isPlayerA) {
             state.warningA = 0; // Reset
             state.scoreB = Math.min(state.scoreB + 1, matchConfig.pointsToWinSet); // Bod pro B
+            opponentScore = state.scoreB;
         } else {
             state.warningB = 0; // Reset
             state.scoreA = Math.min(state.scoreA + 1, matchConfig.pointsToWinSet); // Bod pro A
+            opponentScore = state.scoreA;
         }
-        addToLog(`${playerName}: STRIKE! (+1 bod soupeři)`);
+        const opponent = isPlayerA ? 'B' : 'A';
+        const isSetWinner = opponentScore >= matchConfig.pointsToWinSet;
+
+        state.logs.unshift({
+            type: 'strike',
+            player: player,
+            pointsType: null,
+            points: 1,
+            scoreOwn: isPlayerA ? state.scoreA : state.scoreB,
+            scoreOpp: isPlayerA ? state.scoreB : state.scoreA,
+            setsWonDisplay: setsWonDisplay,
+            setNumber: state.currentSet,
+            winningPlayer: isSetWinner ? opponent : null,
+            time: time
+        });
     }
-    
+
     checkSetWin();
     updateUI();
     saveMatchToStorage();
@@ -278,7 +332,6 @@ function nextSet() {
     state.warningA = 0; state.warningB = 0;
     state.stats = { XTR: 0, OVR: 0, BST: 0, SPF: 0 };
     state.currentSet++;
-    addToLog(`--- ZAČÁTEK SETU ${state.currentSet} ---`);
     updateUI();
     saveMatchToStorage();
 }
@@ -300,7 +353,6 @@ function resetMatch() {
     document.getElementById('matchOverModal').classList.add('hidden');
     document.getElementById('winnerModal').classList.add('hidden');
     updateUI();
-    addToLog("Zápas byl resetován.");
 }
 
 function resetMatchData() {
@@ -376,20 +428,81 @@ function updateUI() {
     else btnRedo.style.opacity = "0.3";
 }
 
-function addToLog(msg) {
-    const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-    state.logs.unshift(`[${time}] ${msg}`);
-}
 function toggleHistory() {
     const modal = document.getElementById('historyModal');
     const list = document.getElementById('historyList');
     if (modal.classList.contains('hidden')) {
         list.innerHTML = '';
-        state.logs.forEach(log => {
-            const li = document.createElement('li'); li.textContent = log; list.appendChild(li);
+        let lastSetNumber = null;
+
+        state.logs.forEach(entry => {
+            if (matchConfig.mode !== 'bo1' && entry.setNumber !== lastSetNumber) {
+                const divider = document.createElement('li');
+                divider.className = 'history-divider';
+                let dividerText = `SET ${entry.setNumber}`;
+                if (entry.winningPlayer) {
+                    dividerText += ` – ${getPlayerName(entry.winningPlayer)} Wins`;
+                }
+                divider.textContent = dividerText;
+                list.appendChild(divider);
+                lastSetNumber = entry.setNumber;
+            }
+
+            const li = document.createElement('li');
+            li.className = `history-entry entry-${entry.player}`;
+
+            const info = document.createElement('div');
+            info.className = 'history-entry-info';
+
+            const nameLine = document.createElement('div');
+            nameLine.className = 'history-entry-name';
+            nameLine.textContent = getPlayerName(entry.player);
+            if (matchConfig.mode !== 'bo1' && entry.setsWonDisplay > 0) {
+                const stars = document.createElement('span');
+                stars.className = 'history-stars';
+                stars.textContent = ' ' + '★'.repeat(entry.setsWonDisplay);
+                nameLine.appendChild(stars);
+            }
+
+            const scoreLine = document.createElement('div');
+            scoreLine.className = 'history-entry-score';
+            let scoreText = `${entry.scoreOwn}-${entry.scoreOpp}`;
+            if (entry.winningPlayer === entry.player) {
+                scoreText += ` – ${getPlayerName(entry.player)} Wins`;
+            }
+            scoreLine.textContent = scoreText;
+
+            info.appendChild(nameLine);
+            info.appendChild(scoreLine);
+
+            const pill = document.createElement('span');
+            let pillLabel, pillClass;
+            if (entry.type === 'score') {
+                const typeNames = { XTR: 'XTREME', OVR: 'OVER', BST: 'BURST', SPF: 'SPIN' };
+                pillLabel = `${typeNames[entry.pointsType]} +${entry.points}`;
+                pillClass = `history-pill pill-score entry-${entry.player}`;
+            } else if (entry.type === 'warning1') {
+                pillLabel = '1. VAROVÁNÍ';
+                pillClass = 'history-pill pill-warning1';
+            } else if (entry.type === 'warning2') {
+                pillLabel = '2. VAROVÁNÍ';
+                pillClass = 'history-pill pill-warning2';
+            } else {
+                pillLabel = 'STRIKE +1';
+                pillClass = 'history-pill pill-strike';
+            }
+            pill.className = pillClass;
+            pill.textContent = pillLabel;
+
+            li.appendChild(info);
+            li.appendChild(pill);
+            list.appendChild(li);
         });
+
         modal.classList.remove('hidden');
-    } else { modal.classList.add('hidden'); }
+    } else {
+        modal.classList.add('hidden');
+    }
 }
 function getPlayerName(playerCode) {
     if (playerCode === 'A') return document.querySelector('.player-score-box:first-child .player-name').innerText;

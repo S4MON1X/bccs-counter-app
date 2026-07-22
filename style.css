@@ -522,11 +522,81 @@ body {
     color: #aaa;
 }
 
-#historyList li {
-    border-bottom: 1px solid #333;
-    padding: 8px 0;
+.history-divider {
+    text-align: center;
+    color: #666;
     font-family: 'Rajdhani', sans-serif;
-    font-size: 0.9rem;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 10px 0 6px 0;
+}
+
+.history-entry {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #333;
+    padding: 10px 0;
+    font-family: 'Rajdhani', sans-serif;
+    gap: 10px;
+}
+
+.history-entry-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.history-entry-name {
+    font-weight: bold;
+    font-size: 1rem;
+}
+
+.history-entry.entry-A .history-entry-name {
+    color: var(--pA-lvl1);
+}
+
+.history-entry.entry-B .history-entry-name {
+    color: var(--pB-lvl1);
+}
+
+.history-stars {
+    font-size: 0.8rem;
+}
+
+.history-entry-score {
+    font-size: 0.85rem;
+    color: #888;
+    margin-top: 2px;
+}
+
+.history-pill {
+    flex-shrink: 0;
+    padding: 4px 12px;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    color: #fff;
+    white-space: nowrap;
+}
+
+.history-pill.pill-score.entry-A {
+    background: var(--pA-lvl2);
+}
+
+.history-pill.pill-score.entry-B {
+    background: var(--pB-lvl2);
+}
+
+.history-pill.pill-warning1 {
+    background: var(--accent-yellow);
+    color: #000;
+}
+
+.history-pill.pill-warning2,
+.history-pill.pill-strike {
+    background: #ff4444;
+    color: #fff;
 }
 
 /* NOVÉ STYLY PRO MODAL */
