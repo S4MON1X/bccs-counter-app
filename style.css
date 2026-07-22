@@ -114,6 +114,8 @@ body {
 .btn-setup.continue {
     border-color: var(--highlight-color);
     margin-top: 15px;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .setup-footer {
